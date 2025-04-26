@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import chalk from 'chalk';
 import { intro,} from '@clack/prompts';
 import { dsiplay } from './display';

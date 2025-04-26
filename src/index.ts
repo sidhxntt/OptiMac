@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as p from "@clack/prompts";
 import chalk from 'chalk';
 import { isNodeInstalled } from "./utils/user_touch";

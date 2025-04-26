@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { intro } from "@clack/prompts";
 import chalk from "chalk";
 import { checkDiskSpace } from "./checkDiskSpace";

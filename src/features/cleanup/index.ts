@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { intro, outro, select, confirm, note, cancel } from "@clack/prompts";
 import chalk from "chalk";
 import { existsSync, mkdirSync } from "node:fs";

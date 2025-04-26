@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { intro, outro } from "@clack/prompts";
 import chalk from "chalk";
 import { SystemUpdates } from "./systemUpdates";

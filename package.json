@@ -1,7 +1,9 @@
 {
   "name": "optimac",
   "version": "1.0.0",
-  "main": "index.js",
+  "bin": {
+    "optimac": "./dist/index.js"
+  },
   "scripts": {
     "dev": "ts-node ./src/index.ts",
     "prod": "node ./dist/index.js",

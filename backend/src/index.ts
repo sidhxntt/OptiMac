@@ -7,6 +7,7 @@ import { uninstaller } from "./features/uninstaller/index";
 import { ram_lens } from "./features/lens/ram_lens/index";
 import { space_lens } from "./features/lens/space_lens/index";
 import { cleaner } from "./features/cleanup/index";
+import { CPU_lens } from "./features/lens/cpu_lens";
 
 async function showMainMenu() {
     while (true) {
@@ -19,6 +20,7 @@ async function showMainMenu() {
                 { value: 'uninstaller', label: 'Uninstaller', hint: 'Remove apps completely' },
                 { value: 'ram', label: 'RAM Lens', hint: 'Monitor memory usage' },
                 { value: 'hdd', label: 'Space Lens', hint: 'Analyze disk space' },
+                { value: 'cpu', label: 'CPU Lens', hint: 'See CPU Utilization' },
                 { value: 'cleaner', label: 'Cleaner', hint: 'Remove system junk' },
                 { value: 'exit', label: 'Exit', hint: 'Quit the application' },
             ],
@@ -43,8 +45,13 @@ async function showMainMenu() {
             else if (options_menu === 'hdd') {
                 await space_lens();
             } 
+            else if (options_menu === 'cpu') {
+                await CPU_lens();
+                break
+            } 
             else {
                 await cleaner();
+                
             }
 
             // After completing any action, ask if user wants to continue

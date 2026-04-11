@@ -1,8 +1,8 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import { ErrorBoundary } from "@/components/CommonLayouts/ErrorBoundary";
 import Home from "./Home";
 
-const routes = createBrowserRouter([
+const routes = createHashRouter([
   {
     path: "/",
     errorElement: <ErrorBoundary />,
@@ -13,7 +13,6 @@ const routes = createBrowserRouter([
       },
     ],
   },
-
 ]);
 
 export default routes;

@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  base: "/OptiMac/", // 👈 THIS is the key fix
+  base: "/OptiMac", 
 
   plugins: [react()],
   resolve: {

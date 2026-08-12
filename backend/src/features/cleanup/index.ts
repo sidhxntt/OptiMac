@@ -1,10 +1,18 @@
-import { intro, outro, select, confirm, note, cancel } from "@clack/prompts";
+import {
+  intro,
+  outro,
+  select,
+  confirm,
+  isCancel,
+  note,
+  cancel,
+} from "@clack/prompts";
 import chalk from "chalk";
 import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import { clearSystemJunk } from "./clearSystemJunk";
-import { emptyTrash } from "./emptyTrash";
+import { clearSystemJunk } from "./clearSystemJunk.js";
+import { emptyTrash } from "./emptyTrash.js";
 
 const HOME = homedir();
 const BACKUP_DIR = path.join(
@@ -18,7 +26,8 @@ export async function cleaner() {
   intro(chalk.blue.bold("macOS Cleaner Utility (Enhanced Safety)"));
 
   const options = [
-    { value: "junk", label: "Safely Clear User Caches & Logs" },
+    { value: "junk", label: "Safely Clear User Caches" },
+    { value: "dry-run", label: "Preview Only (dry run, deletes nothing)" },
     { value: "trash", label: "Empty Trash Bins" },
     { value: "both", label: "Clear Both Caches & Trash" },
     { value: "exit", label: "Exit Cleaner" },
@@ -29,29 +38,37 @@ export async function cleaner() {
     options,
   });
 
-  if (choice === "exit" || choice === null) {
+  // Ctrl+C returns a cancel Symbol, not null.
+  if (isCancel(choice) || choice === "exit") {
     cancel("Operation cancelled");
     return outro("Goodbye! 👋");
   }
 
-  // Confirmation before proceeding
+  const dryRun = choice === "dry-run";
+  const cleansJunk = choice === "junk" || choice === "both" || dryRun;
+  const emptiesTrash = choice === "trash" || choice === "both";
+
+  // Confirmation before proceeding. Each directory is confirmed individually
+  // later on; this is only the overall go-ahead.
   const confirmed = await confirm({
-    message: `This will ${
-      choice === "both"
-        ? "clear user caches/logs AND empty trash bins"
-        : choice === "junk"
-        ? "clear user cache and log files"
-        : "empty all trash bins"
-    }. Continue?`,
+    message: dryRun
+      ? "Preview which cache files would be removed? Nothing will be deleted."
+      : `This will ${
+          choice === "both"
+            ? "clear user caches AND empty trash bins"
+            : choice === "junk"
+            ? "clear user cache files"
+            : "empty the trash"
+        }. You will be asked about each location. Continue?`,
   });
 
-  if (!confirmed) {
+  if (isCancel(confirmed) || !confirmed) {
     cancel("Operation cancelled");
     return outro("No changes were made.");
   }
 
   // Create backup directory
-  if (choice === "junk" || choice === "both") {
+  if (cleansJunk && !dryRun) {
     note(
       chalk.blue(
         `Important configuration files will be backed up to ${BACKUP_DIR}`
@@ -65,17 +82,20 @@ export async function cleaner() {
   }
 
   try {
-    if (choice === "junk" || choice === "both") {
-      await clearSystemJunk(HOME, BACKUP_DIR);
+    if (cleansJunk) {
+      await clearSystemJunk(HOME, BACKUP_DIR, dryRun);
     }
 
-    if (choice === "trash" || choice === "both") {
+    if (emptiesTrash) {
       await emptyTrash(HOME);
     }
 
-    note(chalk.green("✔ Cleaning completed successfully!"), "Status");
+    note(
+      chalk.green(dryRun ? "✔ Dry run complete." : "✔ Cleaning completed."),
+      "Status"
+    );
 
-    if (choice === "junk" || choice === "both") {
+    if (cleansJunk && !dryRun && existsSync(BACKUP_DIR)) {
       note(
         chalk.green(`Configuration backups are stored in ${BACKUP_DIR}`),
         "Backup Location"

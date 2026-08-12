@@ -1,4 +1,4 @@
-import { renderTable } from "./renderTable";
+import { renderTable } from "./renderTable.js";
 import readline from 'readline';
 import {outro} from '@clack/prompts';
 import chalk from 'chalk';

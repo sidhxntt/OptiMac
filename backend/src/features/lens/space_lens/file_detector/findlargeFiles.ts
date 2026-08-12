@@ -1,12 +1,9 @@
 import { spinner } from "@clack/prompts";
 import chalk from "chalk";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
 import fs from "node:fs";
-import { formatSize, formatDate } from "./formatter";
-import { getSearchDirectories } from "./getSearchDirectories";
-
-const execAsync = promisify(exec);
+import { formatSize, formatDate } from "./formatter.js";
+import { getSearchDirectories } from "./getSearchDirectories.js";
+import { runFind } from "./runFind.js";
 
 export async function findLargeFiles(HOME: string) {
   const s = spinner();
@@ -19,14 +16,13 @@ export async function findLargeFiles(HOME: string) {
     // Process each directory separately to avoid permission errors
     for (const dir of searchDirs) {
       try {
-        const { stdout } = await execAsync(
-          `find "${dir}" -type f -size +500M -not -path "*/\\.*" -not -path "*/node_modules/*" 2>/dev/null`
-        );
-
-        const files = stdout
-          .trim()
-          .split("\n")
-          .filter((file) => file);
+        const files = await runFind([
+          dir,
+          "-type", "f",
+          "-size", "+500M",
+          "-not", "-path", "*/.*",
+          "-not", "-path", "*/node_modules/*",
+        ]);
 
         for (const filePath of files) {
           try {

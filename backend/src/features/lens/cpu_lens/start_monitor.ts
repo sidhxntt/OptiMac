@@ -1,6 +1,6 @@
 import readline from 'readline';
 import chalk from 'chalk';
-import { renderMonitor } from './render_monitor';
+import { renderMonitor } from './render_monitor.js';
 
 export default function startMonitor() {
     console.log(chalk.blue.bold('CPU Monitor'));

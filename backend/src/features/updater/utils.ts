@@ -1,12 +1,13 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 
 export const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
-// Check if a command exists
+// Check if a command exists (argv form, so the name is never shell-parsed)
 export async function commandExists(command: string) {
   try {
-    await execAsync(`which ${command}`);
+    await execFileAsync("which", [command]);
     return true;
   } catch (error) {
     return false;

@@ -1,7 +1,7 @@
 import { intro, outro, note } from "@clack/prompts";
 import chalk from "chalk";
-import { getApplications } from "./getApplicationDetails";
-import { display } from "./display";
+import { getApplications } from "./getApplicationDetails.js";
+import { display } from "./display.js";
 
 export async function uninstaller() {
   intro(chalk.bold(chalk.cyan("macOS App Uninstaller")));

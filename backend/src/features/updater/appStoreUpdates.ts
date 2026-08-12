@@ -1,6 +1,6 @@
 import { confirm, log } from "@clack/prompts";
 import chalk from "chalk";
-import { execAsync } from "./utils";
+import { execAsync } from "./utils.js";
 
 export async function OpenAppStore() {
   const shouldOpenAppStore = await confirm({

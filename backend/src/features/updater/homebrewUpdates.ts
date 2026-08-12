@@ -1,8 +1,8 @@
 import { confirm, spinner, log } from "@clack/prompts";
 import chalk from "chalk";
 import { execa } from "execa";
-import { parseBrewUpdates } from "./output_parsing";
-import { commandExists } from "./utils";
+import { parseBrewUpdates } from "./output_parsing.js";
+import { commandExists } from "./utils.js";
 
 export async function HomeBrew() {
   const hasBrew = await commandExists("brew");

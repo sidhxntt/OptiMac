@@ -1,5 +1,5 @@
-import { openSystemUpdates } from "./openSystemUpdates";
-import { parseSystemUpdates } from "./output_parsing";
+import { openSystemUpdates } from "./openSystemUpdates.js";
+import { parseSystemUpdates } from "./output_parsing.js";
 import { confirm, spinner, log } from "@clack/prompts";
 import chalk from "chalk";
 import { execa } from "execa";

@@ -1,11 +1,9 @@
-import { getSearchDirectories } from "./getSearchDirectories";
+import { getSearchDirectories } from "./getSearchDirectories.js";
 import { spinner } from "@clack/prompts";
 import chalk from "chalk";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
 import fs from "node:fs";
-import { formatSize, formatDate } from "./formatter";
-const execAsync = promisify(exec);
+import { formatSize, formatDate } from "./formatter.js";
+import { runFind } from "./runFind.js";
 
 export async function findOldFiles(HOME: string) {
   const s = spinner();
@@ -22,14 +20,12 @@ export async function findOldFiles(HOME: string) {
     // Process each directory separately
     for (const dir of searchDirs) {
       try {
-        const { stdout } = await execAsync(
-          `find "${dir}" -type f -not -path "*/\\.*" -size +50M 2>/dev/null`
-        );
-
-        const files = stdout
-          .trim()
-          .split("\n")
-          .filter((file) => file);
+        const files = await runFind([
+          dir,
+          "-type", "f",
+          "-not", "-path", "*/.*",
+          "-size", "+50M",
+        ]);
 
         for (const filePath of files) {
           try {

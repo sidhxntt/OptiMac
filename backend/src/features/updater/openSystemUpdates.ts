@@ -1,4 +1,4 @@
-import { getMacOSVersion, execAsync } from "./utils";
+import { getMacOSVersion, execAsync } from "./utils.js";
 
 export async function openSystemUpdates() {
   const version = await getMacOSVersion();

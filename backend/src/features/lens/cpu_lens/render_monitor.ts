@@ -1,5 +1,5 @@
-import getProgressBar from "./bar";
-import { getCpuUsage } from "./CPU_usage";
+import getProgressBar from "./bar.js";
+import { getCpuUsage } from "./CPU_usage.js";
 import Table from 'cli-table3';
 import chalk from 'chalk';
 

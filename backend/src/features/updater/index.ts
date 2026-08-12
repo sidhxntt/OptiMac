@@ -1,8 +1,8 @@
 import { intro, outro } from "@clack/prompts";
 import chalk from "chalk";
-import { SystemUpdates } from "./systemUpdates";
-import { OpenAppStore } from "./appStoreUpdates";
-import { HomeBrew } from "./homebrewUpdates";
+import { SystemUpdates } from "./systemUpdates.js";
+import { OpenAppStore } from "./appStoreUpdates.js";
+import { HomeBrew } from "./homebrewUpdates.js";
 
 // Main function
 export async function updater() {

@@ -1,10 +1,10 @@
 import { intro, outro, note } from "@clack/prompts";
 import chalk from "chalk";
 import { homedir } from "node:os";
-import { getSearchDirectories } from "./getSearchDirectories";
-import { findLargeFiles } from "./findlargeFiles";
-import { findOldFiles } from "./findOldFiles";
-import { displayResults } from "./displayResults";
+import { getSearchDirectories } from "./getSearchDirectories.js";
+import { findLargeFiles } from "./findlargeFiles.js";
+import { findOldFiles } from "./findOldFiles.js";
+import { displayResults } from "./displayResults.js";
 
 const HOME = homedir();
 

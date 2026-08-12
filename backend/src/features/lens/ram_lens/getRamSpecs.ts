@@ -1,5 +1,5 @@
 import os from 'os';
-import { formatBytes } from './formatBytes';
+import { formatBytes } from './formatBytes.js';
 
 // Function to get RAM specifications
 export function getRamSpecs() {

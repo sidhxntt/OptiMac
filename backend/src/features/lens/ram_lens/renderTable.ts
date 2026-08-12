@@ -1,5 +1,5 @@
-import { getProgressBar } from "./getProgressBar";
-import { getRamSpecs } from "./getRamSpecs";
+import { getProgressBar } from "./getProgressBar.js";
+import { getRamSpecs } from "./getRamSpecs.js";
 import Table from "cli-table3";
 import chalk from "chalk";
 

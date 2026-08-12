@@ -1,21 +1,15 @@
 import chalk from "chalk";
 import { log } from "@clack/prompts";
-import { deleteWithPrivileges } from "./deleteWithPrivileges";
-import type { RelatedFile } from './types';
+import { deleteWithPrivileges } from "./deleteWithPrivileges.js";
+import type { RelatedFile } from './types.js';
 
 export async function deleteAppAndFiles(
   appPath: string,
   relatedFiles: RelatedFile[]
 ): Promise<boolean> {
   try {
-    // Delete main application
-    const appDeleted = await deleteWithPrivileges(appPath, true);
-    if (!appDeleted) {
-      log.error("Deletion failed");
-      return false;
-    }
-
-    // Delete related files
+    // Related files first, bundle last: if something fails part-way through,
+    // the app is still installed rather than gone with its leftovers behind.
     let successCount = 0;
     for (const file of relatedFiles) {
       const fileDeleted = await deleteWithPrivileges(
@@ -30,6 +24,14 @@ export async function deleteAppAndFiles(
         `Deleted ${successCount}/${relatedFiles.length} related files`
       )
     );
+
+    // Delete main application
+    const appDeleted = await deleteWithPrivileges(appPath, true);
+    if (!appDeleted) {
+      log.error(`Could not remove the application bundle at ${appPath}`);
+      return false;
+    }
+
     return true;
   } catch (error) {
     log.error(

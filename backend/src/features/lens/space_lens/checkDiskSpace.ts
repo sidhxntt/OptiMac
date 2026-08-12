@@ -1,9 +1,9 @@
-import { getDiskName } from "./diskname";
-import { formatBytes } from "./formatBytes";
+import { getDiskName } from "./diskname.js";
+import { formatBytes } from "./formatBytes.js";
 import { outro, note, confirm, isCancel } from '@clack/prompts';
 import chalk from 'chalk';
 import fs from 'node:fs/promises';
-import { file_detector } from "./file_detector/index";
+import { file_detector } from "./file_detector/index.js";
 
 export async function checkDiskSpace(){
     try {

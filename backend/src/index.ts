@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import * as p from "@clack/prompts";
+import { isCancel } from "@clack/prompts";
 import chalk from 'chalk';
-import { isNodeInstalled } from "./utils/user_touch";
-import { updater } from "./features/updater/index";
-import { uninstaller } from "./features/uninstaller/index";
-import { ram_lens } from "./features/lens/ram_lens/index";
-import { space_lens } from "./features/lens/space_lens/index";
-import { cleaner } from "./features/cleanup/index";
-import { CPU_lens } from "./features/lens/cpu_lens";
+import { updater } from "./features/updater/index.js";
+import { uninstaller } from "./features/uninstaller/index.js";
+import { ram_lens } from "./features/lens/ram_lens/index.js";
+import { space_lens } from "./features/lens/space_lens/index.js";
+import { cleaner } from "./features/cleanup/index.js";
+import { CPU_lens } from "./features/lens/cpu_lens/index.js";
 
 async function showMainMenu() {
     while (true) {
@@ -25,6 +25,13 @@ async function showMainMenu() {
                 { value: 'exit', label: 'Exit', hint: 'Quit the application' },
             ],
         });
+
+        // Ctrl+C returns a cancel Symbol, which matches none of the string
+        // cases below - it must never fall through to a destructive action.
+        if (isCancel(options_menu)) {
+            p.cancel('Operation cancelled');
+            process.exit(0);
+        }
 
         if (options_menu === 'exit') {
             p.outro(chalk.green('Goodbye! 👋'));
@@ -49,15 +56,22 @@ async function showMainMenu() {
                 await CPU_lens();
                 break
             } 
-            else {
+            else if (options_menu === 'cleaner') {
                 await cleaner();
-                
+            }
+            else {
+                // Unknown option: do nothing rather than guessing.
             }
 
             // After completing any action, ask if user wants to continue
             const continueUsing = await p.confirm({
                 message: 'Would you like to perform another action?',
             });
+
+            if (isCancel(continueUsing)) {
+                p.cancel('Operation cancelled');
+                process.exit(0);
+            }
 
             if (!continueUsing) {
                 p.outro(chalk.green('Goodbye! 👋'));
@@ -70,6 +84,11 @@ async function showMainMenu() {
                 message: 'Would you like to try again?',
             });
 
+            if (isCancel(tryAgain)) {
+                p.cancel('Operation cancelled');
+                process.exit(0);
+            }
+
             if (!tryAgain) {
                 p.outro(chalk.green('Goodbye! 👋'));
                 process.exit(0);
@@ -79,11 +98,6 @@ async function showMainMenu() {
 }
 
 async function main() {
-    if (!isNodeInstalled()) {
-        p.log.error(chalk.red("❌ Node.js required. Please install it first."));
-        process.exit(1);
-    }
-
     await showMainMenu();
 }
 

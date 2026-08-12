@@ -1,80 +1,87 @@
-import { spinner, note } from "@clack/prompts";
+import { confirm, isCancel, note, log } from "@clack/prompts";
 import chalk from "chalk";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-import { existsSync } from "node:fs";
-import { runCommand } from "./runCommand";
-const execAsync = promisify(exec);
+import { existsSync, promises as fs } from "node:fs";
+import path from "node:path";
+import { runCommand } from "./runCommand.js";
+
+/**
+ * Removes everything directly inside ~/.Trash. Node only - no shell, no
+ * `find -delete`, and never any volume other than the user's own trash.
+ */
+async function purgeUserTrash(trashPath: string) {
+  const entries = await fs.readdir(trashPath, { withFileTypes: true });
+  let removed = 0;
+  let failed = 0;
+
+  for (const entry of entries) {
+    const target = path.join(trashPath, entry.name);
+    try {
+      await fs.rm(target, { recursive: true, force: true });
+      removed++;
+    } catch {
+      failed++;
+    }
+  }
+
+  note(
+    chalk.green(
+      `Removed ${removed} item(s) from ${trashPath}.` +
+        (failed > 0 ? ` ${failed} item(s) could not be removed.` : "")
+    ),
+    "Trash"
+  );
+}
 
 export async function emptyTrash(HOME: string) {
-  const s = spinner();
-  s.start("Emptying trash");
-
-  // First try the standard Finder method
+  // Finder is the only mechanism used by default: it handles every mounted
+  // volume correctly, respects permissions, and never touches other users'
+  // .Trashes directories.
   try {
-    await execAsync(
-      "osascript -e 'tell application \"Finder\" to empty trash'"
+    await runCommand(
+      "osascript -e 'tell application \"Finder\" to empty trash'",
+      "Emptying trash via Finder"
     );
-    s.stop("Trash emptied successfully");
+    note(chalk.green("Trash emptied successfully."), "Status");
+    return;
   } catch (error) {
-    s.stop("Standard trash emptying failed, trying alternative method");
+    log.warn(
+      chalk.yellow(
+        `Finder could not empty the trash: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      )
+    );
+  }
 
-    // If the Finder method fails, use a direct approach
-    const trashPaths = [
-      `${HOME}/.Trash`, // User trash
-    ];
+  const trashPath = path.join(HOME, ".Trash");
+  if (!existsSync(trashPath)) {
+    note(chalk.yellow("No user trash directory found."), "Status");
+    return;
+  }
 
-    // Get list of mounted volumes for external trash bins
-    try {
-      const { stdout: volumes } = await execAsync(
-        "ls -d /Volumes/*/ 2>/dev/null"
-      );
-      const volumeList = volumes.split("\n").filter(Boolean);
+  // Explicit, separate opt-in for the fallback. Scoped to ~/.Trash only:
+  // /Volumes/*/.Trashes may live on network shares, Time Machine disks or
+  // belong to other users.
+  const fallback = await confirm({
+    message: `Delete the contents of ${trashPath} directly? Other volumes' trash will not be touched.`,
+    initialValue: false,
+  });
 
-      for (const volume of volumeList) {
-        const trashPath = `${volume.trim()}/.Trashes`;
-        if (existsSync(trashPath)) {
-          trashPaths.push(trashPath);
-        }
-      }
-    } catch (err) {
-      // Ignore volume listing errors
-    }
+  if (isCancel(fallback) || !fallback) {
+    note(chalk.yellow("Trash was left untouched."), "Status");
+    return;
+  }
 
-    // Process each trash path
-    for (const trashPath of trashPaths) {
-      if (!existsSync(trashPath)) continue;
-
-      // List all files in trash
-      try {
-        // First try to remove write protection from files
-        await runCommand(
-          `find "${trashPath}" -type f -exec chmod -f u+w {} \\; 2>/dev/null || true`,
-          "Removing write protection"
-        );
-
-        // Delete files first
-        await runCommand(
-          `find "${trashPath}" -type f -delete 2>/dev/null || true`,
-          `Removing files from ${trashPath}`
-        );
-
-        // Delete directories from deepest level
-        await runCommand(
-          `find "${trashPath}" -depth -type d -empty -delete 2>/dev/null || true`,
-          `Removing directories from ${trashPath}`
-        );
-      } catch (err) {
-        note(
-          chalk.yellow(`Some items in ${trashPath} could not be deleted`),
-          "Warning"
-        );
-      }
-    }
-
+  try {
+    await purgeUserTrash(trashPath);
+  } catch (error) {
     note(
-      chalk.green("Trash emptying completed with alternative method"),
-      "Status"
+      chalk.red(
+        `Could not empty ${trashPath}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      ),
+      "Error"
     );
   }
 }
